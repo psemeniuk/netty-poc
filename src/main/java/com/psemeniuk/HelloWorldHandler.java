@@ -9,6 +9,8 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
 
+import java.math.BigInteger;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_LENGTH;
@@ -27,15 +29,11 @@ public class HelloWorldHandler extends SimpleChannelInboundHandler<FullHttpReque
             response.headers().set(CONTENT_TYPE, "text/plain");
             response.headers().set(CONTENT_LENGTH, response.content().readableBytes());
 
-            try {
-                Thread.sleep(2); // emulates compute
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            new BigInteger(1000, 5, new Random(1)); // emulates compute
 
             ctx.executor().schedule(() -> {
                 ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-            }, 1, TimeUnit.MILLISECONDS); // emulates request to the upstream
+            }, 2, TimeUnit.MILLISECONDS); // emulates request to the upstream
         } else {
             ctx.close();
         }
